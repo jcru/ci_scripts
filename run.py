@@ -277,6 +277,34 @@ class VMTestCase(TestCase):
         check_call('{fab} vm.clear vm.install', fab=TROVE_FAB)
 
 
+class GlobalProxyTestCase(VMTestCase):
+
+    def get_exisiting_global_proxy_nodes(self):
+        global_proxy_nodes = []
+
+        return global_proxy_nodes
+
+    def remove_existing_global_proxy_nodes(self):
+        global_proxy_nodes = self.get_exisiting_global_proxy_nodes()
+
+    def setup(self):
+        super(GlobalProxyTestCase, self).setup()
+
+        # we want to check and remove  any existing global proxy nodes
+        # since this job will create 2 new inova vms (requires 3 total)
+        self.remove_existing_global_proxy_nodes()
+
+        # create global proxy nodes
+        self.global_proxy_nodes = []
+        proxy_nodes_name = ""
+        check_call('{fab} inova.boot_proxy_nodes:name={proxy_nodes_name}',
+                   fab=TROVE_FAB)
+
+    def clean(self):
+        super(GlobalProxyTestCase, self).clean()
+        # delete global proxy nodes
+
+
 class PullRunner(TestCase):
 
     template = 'pull_runner.xml'
@@ -344,6 +372,9 @@ TESTS = [
     VMTestCase(
         'X-Puppet-VM',
         '{fab} {fab_args},{mysql_56},group="cdbdbaas.api.flavors"'),
+    GlobalProxyTestCase(
+        'X-HA-Global-Proxy-Redis',
+        '{fab} {fab_args},{redis_28},group="rax_ha_globalproxy"'),
 ]
 
 
